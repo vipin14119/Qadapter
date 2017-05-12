@@ -9,11 +9,10 @@ function plotData( X, y, levels )
     CM = jet(length(levels));
     for l=levels
         class = find(y == l);
-        plot(X(class, 1), X(class,2),'x','lineWidth', 2,'color', CM(l,:) ,'MarkerSize', 5', ...
+        plot(X(class, 1), X(class,2),'x','lineWidth', 2,'color', CM(l,:) ,'MarkerSize', 5, ...
             'DisplayName', sprintf('Level: %d', l));
     end
     legend('-DynamicLegend');
     hold off;
 
 end
-
