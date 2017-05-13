@@ -16,23 +16,27 @@ def main():
 
     X_norm, mu, sigma = normalize(X)
 
+
     # Appending identity column in data set
 
     X_norm = np.hstack((np.ones((np.size(y), 1)), X_norm))
+    thetas = np.zeros((np.size(levels), np.shape(X_norm)[1]))
+
     fig = plt.figure()
     xc = [1, 1, 1, 1, 2, 2, 2, 2]
     yc = [1, 2, 3, 4, 1, 2, 3, 4]
     for l, xci, yci in zip(levels, xc, yc):
-        ax = fig.add_subplot(xci, yci, 1)
+        # ax = fig.add_subplot(xci, yci, 1)
         y_new = 1*(y == l)
         theta = np.zeros((np.shape(X_norm)[1], 1))
         alpha = 0.1
         iters = 400
         theta, J_hist = gradientDescent(X_norm, y_new, theta, alpha, iters)
-        ax.plot(np.arange(iters), J_hist[:, 0], label='Level '+str(l))
-        print(theta)
-
-    plt.show()
+        # ax.plot(np.arange(iters), J_hist[:, 0], label='Level '+str(l))
+        thetas[l-1] = theta.T
+    # print(thetas)
+    # plt.show()
+    predict(X_norm, thetas, levels)
 
     # print(J_hist)
 
@@ -60,6 +64,20 @@ def gradientDescent(X, y, theta, alpha, iters):
         J_hist[i] = J
     return theta, J_hist
 
+
+def predict(X, thetas, levels):
+    predictions = np.zeros((np.shape(X)[0], 1))
+    for i in range(np.shape(X)[0]):
+        probs = np.zeros((1, np.size(levels)))
+        for l in levels:
+            prob = sigmoid(np.dot(thetas[l-1], X[i].T))
+            print('Prob = ', prob)
+            probs[0, l-1] = prob
+        print('V = ', np.where(probs == np.max(probs)))
+        temp = np.where(probs == np.max(probs))[0][0]
+        print('Max = ', temp)
+        predictions[i,0] = temp
+    print(predictions)
 
 if __name__ == '__main__':
     main()
