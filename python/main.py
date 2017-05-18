@@ -29,15 +29,31 @@ def main():
         # ax = fig.add_subplot(xci, yci, 1)
         y_new = 1*(y == l)
         theta = np.zeros((np.shape(X_norm)[1], 1))
-        alpha = 0.1
-        iters = 400
+        alpha = 5.7
+        iters = 10000
         theta, J_hist = gradientDescent(X_norm, y_new, theta, alpha, iters)
         # ax.plot(np.arange(iters), J_hist[:, 0], label='Level '+str(l))
         thetas[l-1] = theta.T
     # print(thetas)
+    print(J_hist)
     # plt.show()
-    predict(X_norm, thetas, levels)
+    print('Training data accuracy = ',np.mean(1.0*predict(X_norm, thetas, levels) == y)*100)
 
+    data = np.loadtxt('../datasets/testSet.txt', dtype=np.int16, delimiter=',')
+    X = data[:, 0:2]
+    y = data[:,2]
+    y.shape = np.size(y), 1
+
+    # Plot data of question levels for visualisation
+    # Pl.plot(X, y, levels)
+
+    X_norm, mu, sigma = normalize(X)
+
+
+    # Appending identity column in data set
+
+    X_norm = np.hstack((np.ones((np.size(y), 1)), X_norm))
+    print('Test data accuracy = ',np.mean(1.0*predict(X_norm, thetas, levels) == y)*100)
     # print(J_hist)
 
 
@@ -71,13 +87,11 @@ def predict(X, thetas, levels):
         probs = np.zeros((1, np.size(levels)))
         for l in levels:
             prob = sigmoid(np.dot(thetas[l-1], X[i].T))
-            print('Prob = ', prob)
             probs[0, l-1] = prob
-        print('V = ', np.where(probs == np.max(probs)))
-        temp = np.where(probs == np.max(probs))[0][0]
-        print('Max = ', temp)
-        predictions[i,0] = temp
-    print(predictions)
+        temp = np.where(probs == np.max(probs))[1][0]
+        predictions[i,0] = temp + 1
+    # print(predictions)
+    return predictions
 
 if __name__ == '__main__':
     main()
