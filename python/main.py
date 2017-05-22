@@ -12,14 +12,17 @@ def main():
     levels = np.arange(1,9)
 
     # Plot data of question levels for visualisation
-    # Pl.plot(X, y, levels)
+    Pl.plot(X, y, levels)
+    # X = mapFeature(X[:,0], X[:,1])
+
 
     X_norm, mu, sigma = normalize(X)
 
 
     # Appending identity column in data set
-
+    print(np.shape(X_norm))
     X_norm = np.hstack((np.ones((np.size(y), 1)), X_norm))
+
     thetas = np.zeros((np.size(levels), np.shape(X_norm)[1]))
 
     fig = plt.figure()
@@ -36,8 +39,9 @@ def main():
         thetas[l-1] = theta.T
     # print(thetas)
     print(J_hist)
-    # plt.show()
-    print('Training data accuracy = ',np.mean(1.0*predict(X_norm, thetas, levels) == y)*100)
+    print('\n\n============= Training Data Accuracy ==========\n')
+    print(np.mean(1.0*predict(X_norm, thetas, levels, mu, sigma) == y)*100)
+    print('\n==================================================\n')
 
     data = np.loadtxt('../datasets/testSet.txt', dtype=np.int16, delimiter=',')
     X = data[:, 0:2]
@@ -53,7 +57,8 @@ def main():
     # Appending identity column in data set
 
     X_norm = np.hstack((np.ones((np.size(y), 1)), X_norm))
-    print('Test data accuracy = ',np.mean(1.0*predict(X_norm, thetas, levels) == y)*100)
+    print(predict(X_norm, thetas, levels, mu, sigma))
+    # print('Test data accuracy = ',np.mean(1.0*predict(X_norm, thetas, levels) == y)*100)
     # print(J_hist)
 
 
@@ -81,14 +86,26 @@ def gradientDescent(X, y, theta, alpha, iters):
     return theta, J_hist
 
 
-def predict(X, thetas, levels):
+def mapFeature(x1, x2):
+    x1.shape = np.size(x1), 1
+    x2.shape = np.size(x2), 1
+    X = np.hstack((x1, x2, np.sin(x1) + x1, np.sin(x2) + x2))
+    print(np.shape(X))
+    return np.sin(x1*x2) + x1*x2
+
+def predict(X, thetas, levels, mu, sigma):
+
     predictions = np.zeros((np.shape(X)[0], 1))
     for i in range(np.shape(X)[0]):
         probs = np.zeros((1, np.size(levels)))
         for l in levels:
             prob = sigmoid(np.dot(thetas[l-1], X[i].T))
             probs[0, l-1] = prob
+
         temp = np.where(probs == np.max(probs))[1][0]
+        # print(mu, sigma)
+        X[i] = (X[i]*sigma)+mu
+        print('Predicted Level for {} sec and {} accuracy is {} with {} Confidence'.format(X[i,1], X[i,2], temp+1, probs[0,temp]*100))
         predictions[i,0] = temp + 1
     # print(predictions)
     return predictions
