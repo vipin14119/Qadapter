@@ -1,8 +1,71 @@
 import numpy as np
+import scipy as sp
+
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+
 import plotData as Pl
+
 from featureNormalize import normalize
+
 # Load Training data and prepare classes from it
+
+class Adaptive:
+    """
+        Adaptive algorithm class for learning question levels from data
+    """
+
+    def __init__(self, path):
+        """
+        @method: constructor of Adaptive class
+        @param: path -> path of dataset
+        """
+
+        self.path = path
+        self.X = None
+        self.y = None
+        self.levels = None
+        self.nlevels = None
+
+    def prepare_data(self):
+        """
+        @method: divide data into classes and input variables
+        """
+
+        data = sp.genfromtxt(self.path, delimiter=',')
+        self.X = data[:, 0:2]
+        self.y = data[:,2]
+        self.y.shape = sp.size(self.y), 1
+        self.levels = np.arange(1,9)
+
+    def plot_data(self):
+        """
+        @method: draw a scatter plot of data corresponding to levels specified
+        """
+
+        colors = cm.rainbow(sp.linspace(0, 1, len(self.levels)))
+        fig = plt.figure()
+
+        for l,c in zip(self.levels, colors):
+            indices = sp.where(self.y == l)[0]
+            ax1 = fig.add_subplot(111)
+            ax1.scatter(self.X[indices,0], self.X[indices,1], s=10, color=c, marker='s', label='Level'+str(l))
+        plt.legend(loc='Upper left');
+        plt.show()
+
+
+def plotData(X, y, levels):
+    colors = cm.rainbow(sp.linspace(0, 1, len(levels)))
+    fig = plt.figure()
+
+    for l,c in zip(levels, colors):
+        indices = sp.where(y == l)[0]
+        ax1 = fig.add_subplot(111)
+        ax1.scatter(X[indices,0], X[indices,1], s=10, color=c, marker='s', label='Level'+str(l))
+    plt.legend(loc='Upper left');
+    plt.show()
+
+    # plotData(X, y, levels)
 
 def main():
     data = np.loadtxt('../datasets/levelsData1.txt', dtype=np.int16, delimiter=',')
@@ -111,4 +174,8 @@ def predict(X, thetas, levels, mu, sigma):
     return predictions
 
 if __name__ == '__main__':
-    main()
+    # main()
+    path = '../datasets/levelsData1.txt'
+    adaptive = Adaptive(path)
+    adaptive.prepare_data()
+    adaptive.plot_data()
